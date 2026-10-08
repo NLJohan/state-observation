@@ -137,7 +137,7 @@ ObserverBase::StateVector KalmanFilterBase::oneStepEstimation_()
   oc_.pbar.triangularView<Eigen::Upper>() += a_ * pr_.selfadjointView<Eigen::Upper>() * a_.transpose();
 
   // innovation Measurements
-  arithm_->measurementDifference(this->y_[k + 1], ybar_(), oc_.inoMeas);
+  arithm_->measurementDifference(this->y_[k + 1], ybar_(), inoMeas_);
 
   oc_.inoMeasCov.triangularView<Eigen::Upper>() = r_;
   oc_.inoMeasCov.triangularView<Eigen::Upper>() += c_ * oc_.pbar.selfadjointView<Eigen::Upper>() * c_.transpose();
@@ -153,7 +153,7 @@ ObserverBase::StateVector KalmanFilterBase::oneStepEstimation_()
 
   oc_.kGain.noalias() = oc_.pbar.selfadjointView<Eigen::Upper>() * (c_.transpose() * oc_.inoMeasCovInverse);
 
-  innovation_.noalias() = oc_.kGain * oc_.inoMeas;
+  innovation_.noalias() = oc_.kGain * inoMeas_;
 
   // update
 
@@ -410,6 +410,11 @@ Vector KalmanFilterBase::getSimulatedMeasurement(TimeIndex k)
 const Vector & KalmanFilterBase::getInnovation()
 {
   return innovation_;
+}
+
+const Vector & KalmanFilterBase::getMeasurementPredictionError()
+{
+  return inoMeas_;
 }
 
 const Vector & KalmanFilterBase::getLastPrediction() const
